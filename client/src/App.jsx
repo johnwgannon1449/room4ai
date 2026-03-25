@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import ClassSetup from './pages/ClassSetup';
 import TemplatePicker from './pages/TemplatePicker';
 import LessonWizard from './pages/LessonWizard';
+import QuickLesson from './pages/QuickLesson';
 import { api } from './utils/api';
 
 export default function App() {
@@ -24,18 +25,9 @@ export default function App() {
     }
   }, []);
 
-  function handleLogin(userData) {
-    setUser(userData);
-  }
-
-  function handleLogout() {
-    localStorage.removeItem('room4ai_token');
-    setUser(null);
-  }
-
-  function handleUserUpdate(userData) {
-    setUser(userData);
-  }
+  function handleLogin(userData) { setUser(userData); }
+  function handleLogout() { localStorage.removeItem('room4ai_token'); setUser(null); }
+  function handleUserUpdate(userData) { setUser(userData); }
 
   if (initializing) return <SplashScreen />;
 
@@ -54,9 +46,11 @@ export default function App() {
           element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />}
         />
         <Route
-          path="/class-setup"
+          path="/class-setup/:id"
           element={user ? <ClassSetup user={user} onUpdate={handleUserUpdate} /> : <Navigate to="/login" replace />}
         />
+        {/* Legacy /class-setup → /class-setup/new */}
+        <Route path="/class-setup" element={<Navigate to="/class-setup/new" replace />} />
         <Route
           path="/templates"
           element={user ? <TemplatePicker user={user} onUpdate={handleUserUpdate} /> : <Navigate to="/login" replace />}
@@ -65,8 +59,12 @@ export default function App() {
           path="/lesson/:id"
           element={user ? <LessonWizard user={user} /> : <Navigate to="/login" replace />}
         />
+        <Route
+          path="/quick-lesson"
+          element={user ? <QuickLesson user={user} /> : <Navigate to="/login" replace />}
+        />
 
-        {/* Default redirect */}
+        {/* Defaults */}
         <Route path="/" element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
         <Route path="*" element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
       </Routes>

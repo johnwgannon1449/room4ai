@@ -10,11 +10,11 @@ const SUBJECTS = [
   'Art', 'Music', 'Physical Education', 'Computer Science', 'Foreign Language', 'Other',
 ];
 
-export default function Step1({ data, onChange, onNext }) {
+export default function Step1({ data, classInfo, onChange, onNext }) {
   const [form, setForm] = useState({
     title: data?.title || '',
-    grade: data?.grade || '',
-    subject: data?.subject || '',
+    grade: data?.grade || classInfo?.grade || '',
+    subject: data?.subject || classInfo?.subject || '',
     objectives: data?.objectives || '',
     duration: data?.duration || '',
   });
@@ -24,8 +24,8 @@ export default function Step1({ data, onChange, onNext }) {
     if (data) {
       setForm({
         title: data.title || '',
-        grade: data.grade || '',
-        subject: data.subject || '',
+        grade: data.grade || classInfo?.grade || '',
+        subject: data.subject || classInfo?.subject || '',
         objectives: data.objectives || '',
         duration: data.duration || '',
       });
@@ -43,7 +43,6 @@ export default function Step1({ data, onChange, onNext }) {
     if (!form.title.trim()) e.title = 'Lesson title is required';
     if (!form.grade) e.grade = 'Grade level is required';
     if (!form.subject) e.subject = 'Subject is required';
-    if (!form.objectives.trim()) e.objectives = 'Learning objectives are required';
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -105,26 +104,37 @@ export default function Step1({ data, onChange, onNext }) {
       </div>
 
       <div>
-        <label className="label">Learning Objectives *</label>
+        <label className="label">
+          Learning Objectives
+          <span className="text-gray-400 font-normal ml-1">(optional)</span>
+        </label>
         <textarea
-          className={`input-field min-h-[100px] resize-y ${errors.objectives ? 'border-red-400 ring-1 ring-red-400' : ''}`}
+          className="input-field min-h-[90px] resize-y"
           placeholder="Students will be able to..."
           value={form.objectives}
           onChange={(e) => handleChange('objectives', e.target.value)}
           onBlur={() => onChange(form)}
         />
-        {errors.objectives && <p className="text-red-500 text-xs mt-1">{errors.objectives}</p>}
       </div>
 
       <div>
-        <label className="label">Estimated Duration</label>
-        <input
-          className="input-field"
-          placeholder="e.g., 45 minutes, 2 class periods"
-          value={form.duration}
-          onChange={(e) => handleChange('duration', e.target.value)}
-          onBlur={() => onChange(form)}
-        />
+        <label className="label">
+          Estimated Duration
+          <span className="text-gray-400 font-normal ml-1">(minutes, optional)</span>
+        </label>
+        <div className="flex items-center gap-3">
+          <input
+            className="input-field w-32"
+            type="number"
+            min="1"
+            max="300"
+            placeholder="45"
+            value={form.duration}
+            onChange={(e) => handleChange('duration', e.target.value)}
+            onBlur={() => onChange(form)}
+          />
+          <span className="text-label text-sm">minutes</span>
+        </div>
       </div>
 
       <div className="flex justify-end pt-2">

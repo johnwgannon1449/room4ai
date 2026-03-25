@@ -2,12 +2,8 @@ import { useState } from 'react';
 import { exportLessonToPDF } from '../../utils/pdfExport';
 
 const TEMPLATE_LABELS = {
-  classic: 'Classic',
-  modern: 'Modern',
-  structured: 'Structured',
-  chalkboard: 'Chalkboard',
-  bright: 'Bright',
-  storybook: 'Storybook',
+  classic: 'Classic', modern: 'Modern', structured: 'Structured',
+  chalkboard: 'Chalkboard', bright: 'Bright', storybook: 'Storybook',
 };
 
 const TEMPLATE_DESCRIPTIONS = {
@@ -30,8 +26,9 @@ export default function Step7({ lessonData, lesson, user, classInfo, onExported 
   const objectives = stepData.step1?.objectives || '';
   const duration = stepData.step1?.duration || '';
   const standards = stepData.step2?.selectedStandards || [];
-  const content = stepData.step6?.editedContent || stepData.step3?.content || '';
+  const content = stepData.step5?.editedContent || stepData.step3?.content || '';
   const coveragePercent = stepData.step5?.coveragePercent ?? stepData.step4?.analysis?.coveragePercent ?? 0;
+  const details = stepData.step6 || {};
   const templateName = TEMPLATE_LABELS[user?.template_choice || 'classic'];
 
   async function handleExport() {
@@ -72,7 +69,6 @@ export default function Step7({ lessonData, lesson, user, classInfo, onExported 
 
       {/* Lesson preview */}
       <div className="border border-gray-200 rounded-xl overflow-hidden">
-        {/* Preview header */}
         <div className="bg-primary text-white px-6 py-4">
           <div className="flex items-center gap-1 font-bold text-lg">
             Room<span className="text-accent">4</span>AI
@@ -81,8 +77,7 @@ export default function Step7({ lessonData, lesson, user, classInfo, onExported 
           <p className="text-xs text-white/60 mt-1">{classInfo?.teacher_name || user?.name} · {grade} · {subject}</p>
         </div>
 
-        {/* Content preview */}
-        <div className="p-6 space-y-4 max-h-[500px] overflow-y-auto">
+        <div className="p-6 space-y-4 max-h-[440px] overflow-y-auto">
           <h1 className="text-xl font-semibold text-primary">{title}</h1>
 
           {objectives && (
@@ -95,21 +90,27 @@ export default function Step7({ lessonData, lesson, user, classInfo, onExported 
           {duration && (
             <div>
               <h3 className="text-xs font-semibold text-accent uppercase tracking-wide mb-1">Duration</h3>
-              <p className="text-sm text-text-main">{duration}</p>
+              <p className="text-sm text-text-main">{duration} minutes</p>
+            </div>
+          )}
+
+          {details.warmup_activity && (
+            <div>
+              <h3 className="text-xs font-semibold text-accent uppercase tracking-wide mb-1">
+                Warm-Up{details.warmup_duration ? ` (${details.warmup_duration} min)` : ''}
+              </h3>
+              <p className="text-sm text-text-main">{details.warmup_activity}</p>
             </div>
           )}
 
           {standards.length > 0 && (
             <div>
               <h3 className="text-xs font-semibold text-accent uppercase tracking-wide mb-1">California Standards</h3>
-              <ul className="text-sm text-text-main space-y-1">
-                {standards.slice(0, 5).map((s) => (
-                  <li key={s.code} className="flex items-start gap-1.5">
-                    <span className="text-accent mt-0.5">•</span>
-                    <span><strong>{s.code}:</strong> {s.description}</span>
-                  </li>
+              <ul className="text-sm text-text-main space-y-0.5">
+                {standards.slice(0, 4).map((s) => (
+                  <li key={s.code}><strong>{s.code}</strong>: {s.description}</li>
                 ))}
-                {standards.length > 5 && <li className="text-label text-xs">+{standards.length - 5} more standards...</li>}
+                {standards.length > 4 && <li className="text-label text-xs">+{standards.length - 4} more...</li>}
               </ul>
             </div>
           )}
@@ -117,7 +118,14 @@ export default function Step7({ lessonData, lesson, user, classInfo, onExported 
           {content && (
             <div>
               <h3 className="text-xs font-semibold text-accent uppercase tracking-wide mb-1">Lesson Content</h3>
-              <p className="text-sm text-text-main whitespace-pre-wrap line-clamp-6">{content}</p>
+              <p className="text-sm text-text-main whitespace-pre-wrap line-clamp-5">{content}</p>
+            </div>
+          )}
+
+          {details.exit_ticket && (
+            <div>
+              <h3 className="text-xs font-semibold text-accent uppercase tracking-wide mb-1">Exit Ticket</h3>
+              <p className="text-sm text-text-main">{details.exit_ticket}</p>
             </div>
           )}
 
@@ -127,7 +135,7 @@ export default function Step7({ lessonData, lesson, user, classInfo, onExported 
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-progress-green transition-all duration-500"
+                    className="h-full rounded-full bg-progress-green"
                     style={{ width: `${coveragePercent}%` }}
                   />
                 </div>
@@ -138,7 +146,6 @@ export default function Step7({ lessonData, lesson, user, classInfo, onExported 
         </div>
       </div>
 
-      {/* Export button */}
       <div className="flex flex-col sm:flex-row gap-3 pt-2">
         <button
           onClick={handleExport}
@@ -167,7 +174,7 @@ export default function Step7({ lessonData, lesson, user, classInfo, onExported 
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
           <span className="text-sm text-green-700 font-medium">
-            Lesson exported and archived! You can find it in your dashboard.
+            Lesson exported and archived! Find it in your dashboard.
           </span>
         </div>
       )}

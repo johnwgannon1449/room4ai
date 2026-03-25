@@ -3,7 +3,7 @@ import jsPDF from 'jspdf';
 const TEMPLATES = {
   classic: {
     name: 'Classic',
-    headerBg: [26, 58, 95], // navy
+    headerBg: [26, 58, 95],
     headerText: [255, 255, 255],
     accentColor: [26, 58, 95],
     bodyFont: 'times',
@@ -18,6 +18,7 @@ const TEMPLATES = {
     bodyFont: 'helvetica',
     bodyColor: [30, 41, 59],
     sectionFont: 'helvetica',
+    accentLine: true,
   },
   structured: {
     name: 'Structured',
@@ -68,30 +69,26 @@ export function exportLessonToPDF(lesson, user, classInfo) {
   const margin = 20;
   const contentW = pageW - margin * 2;
 
-  // Header block
+  // Header
   doc.setFillColor(...template.headerBg);
   doc.rect(0, 0, pageW, 40, 'F');
 
-  // Room4AI title in header
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
   doc.setTextColor(...template.headerText);
   doc.text('Room', margin, 18);
   const roomW = doc.getTextWidth('Room');
-  // "4" in amber
   doc.setTextColor(245, 158, 11);
   doc.text('4', margin + roomW, 18);
   doc.setTextColor(...template.headerText);
   const fourW = doc.getTextWidth('4');
   doc.text('AI', margin + roomW + fourW, 18);
 
-  // Tagline
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(...template.headerText);
   doc.text('Lesson planning, elevated.', margin, 26);
 
-  // Teacher info
   doc.setFontSize(9);
   const teacherName = classInfo?.teacher_name || user?.name || 'Teacher';
   const grade = lesson?.grade || classInfo?.grade || '';
@@ -99,16 +96,40 @@ export function exportLessonToPDF(lesson, user, classInfo) {
   const dateStr = classInfo?.class_date
     ? new Date(classInfo.class_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-
   doc.text(`${teacherName}  |  ${grade}  |  ${subject}  |  ${dateStr}`, pageW - margin, 26, { align: 'right' });
 
-  // Accent line for modern template
-  if (template === TEMPLATES.modern) {
+  if (template.accentLine) {
     doc.setFillColor(245, 158, 11);
     doc.rect(0, 40, pageW, 2, 'F');
   }
 
   let y = 52;
+
+  const stepData = lesson?.step_data || {};
+
+  // Section renderer — skips if content is blank/empty
+  function addSection(sectionTitle, content) {
+    const str = String(content || '').trim();
+    if (!str) return;
+    if (y > pageH - 30) { doc.addPage(); y = 20; }
+
+    doc.setFont(template.sectionFont, 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...template.accentColor);
+    doc.text(sectionTitle, margin, y);
+    y += 6;
+
+    doc.setFont(template.bodyFont, 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...template.bodyColor);
+    const lines = doc.splitTextToSize(str, contentW);
+    lines.forEach((line) => {
+      if (y > pageH - 20) { doc.addPage(); y = 20; }
+      doc.text(line, margin, y);
+      y += 5.5;
+    });
+    y += 4;
+  }
 
   // Lesson title
   doc.setFont(template.sectionFont, 'bold');
@@ -119,44 +140,29 @@ export function exportLessonToPDF(lesson, user, classInfo) {
   doc.text(titleLines, margin, y);
   y += titleLines.length * 7 + 4;
 
-  // Divider
   doc.setDrawColor(...template.accentColor);
   doc.setLineWidth(0.5);
   doc.line(margin, y, pageW - margin, y);
   y += 8;
 
-  const stepData = lesson?.step_data || {};
-
-  // Section renderer
-  function addSection(title, content) {
-    if (!content) return;
-    if (y > pageH - 30) {
-      doc.addPage();
-      y = 20;
-    }
-    doc.setFont(template.sectionFont, 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(...template.accentColor);
-    doc.text(title, margin, y);
-    y += 6;
-
-    doc.setFont(template.bodyFont, 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(...template.bodyColor);
-    const lines = doc.splitTextToSize(String(content), contentW);
-    lines.forEach((line) => {
-      if (y > pageH - 20) {
-        doc.addPage();
-        y = 20;
-      }
-      doc.text(line, margin, y);
-      y += 5.5;
-    });
-    y += 4;
+  // Warm-up (only if filled)
+  const details = stepData.step6 || {};
+  if (details.warmup_activity) {
+    const warmupTitle = details.warmup_duration
+      ? `Warm-Up Activity (${details.warmup_duration} min)`
+      : 'Warm-Up Activity';
+    addSection(warmupTitle, details.warmup_activity);
   }
 
-  addSection('Learning Objectives', stepData.step1?.objectives);
-  addSection('Estimated Duration', stepData.step1?.duration);
+  // Objectives — only if filled
+  if (stepData.step1?.objectives?.trim()) {
+    addSection('Learning Objectives', stepData.step1.objectives);
+  }
+
+  // Duration — only if filled
+  if (stepData.step1?.duration) {
+    addSection('Estimated Duration', `${stepData.step1.duration} minutes`);
+  }
 
   // Standards
   if (stepData.step2?.selectedStandards?.length > 0) {
@@ -173,28 +179,26 @@ export function exportLessonToPDF(lesson, user, classInfo) {
       if (y > pageH - 20) { doc.addPage(); y = 20; }
       const line = `• ${s.code}: ${s.description}`;
       const wrapped = doc.splitTextToSize(line, contentW);
-      wrapped.forEach((l) => {
-        doc.text(l, margin, y);
-        y += 5;
-      });
+      wrapped.forEach((l) => { doc.text(l, margin, y); y += 5; });
     });
     y += 4;
   }
 
-  addSection('Lesson Content', stepData.step3?.content);
+  // Lesson content (edited > original)
+  const lessonContent = stepData.step5?.editedContent || stepData.step3?.content;
+  addSection('Lesson Content', lessonContent);
 
-  // Coverage
-  if (stepData.step5?.coveragePercent !== undefined) {
+  // Coverage bar
+  const coverage = stepData.step5?.coveragePercent ?? stepData.step4?.analysis?.coveragePercent;
+  if (coverage !== undefined && coverage !== null) {
     if (y > pageH - 30) { doc.addPage(); y = 20; }
     doc.setFont(template.sectionFont, 'bold');
     doc.setFontSize(11);
     doc.setTextColor(...template.accentColor);
-    doc.text(`Standards Coverage: ${stepData.step5.coveragePercent}%`, margin, y);
+    doc.text(`Standards Coverage: ${coverage}%`, margin, y);
     y += 6;
-
-    // Bar
     const barW = contentW;
-    const fillW = (stepData.step5.coveragePercent / 100) * barW;
+    const fillW = (coverage / 100) * barW;
     doc.setFillColor(226, 232, 240);
     doc.roundedRect(margin, y, barW, 5, 2, 2, 'F');
     if (fillW > 0) {
@@ -204,11 +208,13 @@ export function exportLessonToPDF(lesson, user, classInfo) {
     y += 12;
   }
 
-  if (stepData.step6?.editedContent) {
-    addSection('Finalized Lesson Plan', stepData.step6.editedContent);
-  }
+  // Lesson details fields — only rendered if filled
+  addSection('Exit Ticket / Closing Routine', details.exit_ticket);
+  addSection('Differentiation / Accommodations', details.differentiation_notes);
+  addSection('Materials & Supplies', details.materials);
+  addSection('Homework / Assignment', details.homework_reminder);
 
-  // Footer watermark
+  // Footer
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(203, 213, 225);

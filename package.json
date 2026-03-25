@@ -3,5 +3,8 @@
   "scripts": {
     "build": "cd client && npm install && npm run build && cd ../server && npm install",
     "start": "node server/index.js"
+  },
+  "devDependencies": {
+    "canvas": "^3.2.2"
   }
 }

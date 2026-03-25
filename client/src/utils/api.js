@@ -28,17 +28,23 @@ export const api = {
   getMe: () => request('GET', '/auth/me'),
   updateTemplate: (template_choice) => request('PATCH', '/auth/template', { template_choice }),
 
-  // Classes
-  getClass: () => request('GET', '/classes'),
+  // Classes — multi-class support
+  getClasses: () => request('GET', '/classes'),
+  getClass: (id) => id ? request('GET', `/classes/${id}`) : request('GET', '/classes').then(r => ({ class: r.classes?.[0] || null })),
+  createClass: (body) => request('POST', '/classes', body),
+  updateClass: (id, body) => request('PATCH', `/classes/${id}`, body),
+  deleteClass: (id) => request('DELETE', `/classes/${id}`),
+  // Legacy alias used by LessonWizard
   saveClass: (body) => request('POST', '/classes', body),
 
   // Lessons
-  getLessons: () => request('GET', '/lessons'),
+  getLessons: (classId) => request('GET', classId ? `/lessons?class_id=${classId}` : '/lessons'),
   getLesson: (id) => request('GET', `/lessons/${id}`),
   createLesson: (body) => request('POST', '/lessons', body),
   updateLesson: (id, body) => request('PATCH', `/lessons/${id}`, body),
   deleteLesson: (id) => request('DELETE', `/lessons/${id}`),
   analyzeLesson: (id, body) => request('POST', `/lessons/${id}/analyze`, body),
+  suggestMiniLessons: (body) => request('POST', '/lessons/suggest-mini', body),
 
   // Standards
   getStandards: (grade, subject) => request('GET', `/standards?grade=${encodeURIComponent(grade)}&subject=${encodeURIComponent(subject)}`),
