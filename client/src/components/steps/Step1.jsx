@@ -45,15 +45,24 @@ export default function Step1({ data, classInfo, onChange, onNext }) {
   function validate() {
     const e = {};
     if (!form.title.trim()) e.title = 'Lesson title is required';
-    if (!form.grade) e.grade = 'Grade level is required';
-    if (!form.subject) e.subject = 'Subject is required';
+    // When class context is present, grade/subject come from classInfo (selects are hidden)
+    const effectiveGrade = form.grade || classInfo?.grade || '';
+    const effectiveSubject = form.subject || classInfo?.subject || '';
+    if (!effectiveGrade) e.grade = 'Grade level is required';
+    if (!effectiveSubject) e.subject = 'Subject is required';
     setErrors(e);
     return Object.keys(e).length === 0;
   }
 
   function handleSubmit(e) {
     e.preventDefault();
-    if (validate()) onNext(form);
+    if (validate()) {
+      onNext({
+        ...form,
+        grade: form.grade || classInfo?.grade || '',
+        subject: form.subject || classInfo?.subject || '',
+      });
+    }
   }
 
   return (
