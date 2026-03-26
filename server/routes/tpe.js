@@ -4,9 +4,24 @@ const multer = require('multer');
 const { pool } = require('../db');
 const authMiddleware = require('../middleware/auth');
 const TPE_STANDARDS = require('../data/tpeStandards');
+const SUBJECT_PEDAGOGY = require('../data/tpeSubjectPedagogy');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
+
+// Returns the subject-specific pedagogy text for a given subject and grade,
+// preferring multiple_subject for K–6 and single_subject for 7–12.
+function getPedagogyContext(subject, grade) {
+  if (!subject) return null;
+  const entry = SUBJECT_PEDAGOGY[subject];
+  if (!entry) return null;
+  if (entry.multiple_subject && entry.single_subject) {
+    const gradeNum = parseInt((grade || '').replace(/[^0-9]/g, ''), 10);
+    const isElementary = !isNaN(gradeNum) ? gradeNum <= 6 : /kindergarten/i.test(grade || '');
+    return isElementary ? entry.multiple_subject : entry.single_subject;
+  }
+  return entry.multiple_subject || entry.single_subject;
+}
 
 // GET /api/tpe/standards
 router.get('/standards', authMiddleware, (req, res) => {
@@ -20,24 +35,29 @@ router.post('/actions', authMiddleware, async (req, res) => {
     return res.status(400).json({ error: 'element_id and element_text are required' });
   }
 
+  const pedagogyContext = getPedagogyContext(subject, grade);
+  const pedagogyLine = pedagogyContext
+    ? `\nSubject-specific pedagogical context for this teacher:\n${pedagogyContext}`
+    : '';
+
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 600,
-      system: 'You are an expert California K-12 instructional coach. Generate 3-5 specific, concrete, immediately actionable teacher behaviors for the given TPE element at the specified grade level and subject. Each action must start with a verb and be realistic for a classroom teacher to implement.',
+      system: `You are an expert California K-12 instructional coach specializing in ${subject || 'general education'} at the ${grade || 'K-12'} level.${pedagogyLine}
+
+Generate 3-5 specific, concrete, immediately actionable teacher ACTIONS for the following TPE element at this grade level and subject. Each action must:
+- Start with a strong verb (Design, Implement, Ask, Use, Create, Provide, Model, etc.)
+- Be realistic for a classroom teacher to do in the next week
+- Be specific to ${subject || 'the subject'} at ${grade || 'K-12'} level
+- Directly address the TPE element
+- Be a single clear sentence
+
+Return only the actions as a JSON array of strings. No preamble, no explanation.`,
       messages: [{
         role: 'user',
         content: `TPE Element ${element_id}: ${element_text}
-
-Grade: ${grade || 'K-12'}
-Subject: ${subject || 'General'}
-
-Generate 3-5 specific, concrete teacher actions for this element. Each must:
-- Start with an action verb (Design, Ask, Use, Create, Implement, etc.)
-- Be one clear sentence
-- Be immediately actionable in a real classroom
-- Be appropriate for ${grade || 'K-12'} ${subject || 'students'}
 
 Return ONLY valid JSON:
 { "actions": ["Action 1 sentence.", "Action 2 sentence.", "Action 3 sentence."] }`,
@@ -71,12 +91,17 @@ router.post('/analyze', authMiddleware, async (req, res) => {
     tpe.elements.map((el) => `  ${el.id}: ${el.text}`).join('\n')
   ).join('\n\n');
 
+  const pedagogyContext = getPedagogyContext(subject, grade);
+  const pedagogyLine = pedagogyContext
+    ? ` Subject-specific pedagogical context: ${pedagogyContext}. Use this context to recognize subject-appropriate teaching strategies and evidence in the lesson.`
+    : '';
+
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 4000,
-      system: 'You are an expert California educator evaluating a lesson plan against the California Teaching Performance Expectations (TPEs). For each TPE element provided, identify specific evidence from the lesson text that demonstrates coverage. Quote or closely paraphrase relevant portions. Be fair, constructive, and specific. Return only valid JSON.',
+      system: `You are an expert California educator evaluating a lesson plan against the California Teaching Performance Expectations (TPEs). For each TPE element provided, identify specific evidence from the lesson text that demonstrates coverage. Quote or closely paraphrase relevant portions. Be fair, constructive, and specific. Return only valid JSON.${pedagogyLine}`,
       messages: [{
         role: 'user',
         content: `Evaluate this lesson plan against the selected California TPE elements.
