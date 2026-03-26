@@ -8,7 +8,7 @@ const TEMPLATE_NAMES = {
   chalkboard: 'Chalkboard', bright: 'Bright', storybook: 'Storybook',
 };
 
-function ClassCard({ cls, onEdit, onNewLesson, onViewLessons, expanded, onToggleExpand }) {
+function ClassCard({ cls, onEdit, onNewLesson, onViewLessons, onTpeAnalysis, expanded, onToggleExpand }) {
   return (
     <div className="card hover:shadow-card-hover transition-shadow">
       <div className="flex items-start gap-4">
@@ -39,6 +39,12 @@ function ClassCard({ cls, onEdit, onNewLesson, onViewLessons, expanded, onToggle
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
               </svg>
               New Lesson
+            </button>
+            <button
+              onClick={() => onTpeAnalysis(cls)}
+              className="text-sm font-medium text-primary hover:bg-primary-light transition-colors px-3 py-1.5 rounded-lg border border-primary bg-white"
+            >
+              TPE Analysis
             </button>
             <button
               onClick={onToggleExpand}
@@ -172,6 +178,10 @@ export default function Dashboard({ user, onLogout }) {
     navigate(`/class-setup/${cls.id}`);
   }
 
+  function handleTpeAnalysis(cls) {
+    navigate('/tpe-analysis');
+  }
+
   const firstName = (user?.name || 'Teacher').split(' ')[0];
 
   return (
@@ -181,6 +191,12 @@ export default function Dashboard({ user, onLogout }) {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Logo size="md" />
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('/tpe-explorer')}
+              className="text-sm text-label hover:text-primary transition-colors hidden sm:block"
+            >
+              TPE Standards
+            </button>
             <button
               onClick={() => navigate('/quick-lesson')}
               className="btn-primary text-sm py-2 px-4 flex items-center gap-1"
@@ -251,6 +267,7 @@ export default function Dashboard({ user, onLogout }) {
                 onEdit={handleEdit}
                 onNewLesson={handleNewLesson}
                 onViewLessons={() => {}}
+                onTpeAnalysis={handleTpeAnalysis}
                 expanded={expandedClass === cls.id}
                 onToggleExpand={() => setExpandedClass(expandedClass === cls.id ? null : cls.id)}
               />
