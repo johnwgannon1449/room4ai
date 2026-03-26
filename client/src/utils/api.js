@@ -45,6 +45,7 @@ export const api = {
   deleteLesson: (id) => request('DELETE', `/lessons/${id}`),
   analyzeLesson: (id, body) => request('POST', `/lessons/${id}/analyze`, body),
   suggestMiniLessons: (body) => request('POST', '/lessons/suggest-mini', body),
+  suggestCoverage: (body) => request('POST', '/lessons/suggest-coverage', body),
 
   // Standards
   getStandards: (grade, subject) => request('GET', `/standards?grade=${encodeURIComponent(grade)}&subject=${encodeURIComponent(subject)}`),

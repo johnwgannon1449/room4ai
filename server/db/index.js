@@ -46,6 +46,7 @@ async function initDB() {
       'differentiation_notes TEXT',
       'materials TEXT',
       'homework_reminder TEXT',
+      'default_duration INTEGER',
     ];
     for (const col of classColumns) {
       const colName = col.split(' ')[0];

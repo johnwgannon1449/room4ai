@@ -116,7 +116,7 @@ function QuickStep1({ data, classInfo, onChange, onNext }) {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 recording
                   ? 'bg-red-500 text-white animate-pulse'
-                  : 'bg-primary text-white hover:bg-blue-900'
+                  : 'bg-primary text-white hover:bg-primary-dark'
               } disabled:opacity-50`}
             >
               <svg className="w-3.5 h-3.5" fill={recording ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
@@ -160,13 +160,13 @@ function QuickStep1({ data, classInfo, onChange, onNext }) {
                     onClick={() => toggleStandard(standard)}
                     className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-all ${
                       isSelected
-                        ? 'border-accent bg-amber-50 ring-1 ring-accent'
-                        : 'border-gray-200 bg-white hover:border-gray-300'
+                        ? 'border-primary bg-primary-light ring-1 ring-primary'
+                        : 'border-border bg-white hover:border-primary'
                     }`}
                   >
                     <div className="flex items-start gap-2">
                       <div className={`mt-0.5 w-3.5 h-3.5 rounded border-2 flex-shrink-0 flex items-center justify-center ${
-                        isSelected ? 'bg-accent border-accent' : 'border-gray-300'
+                        isSelected ? 'bg-primary border-primary' : 'border-gray-300'
                       }`}>
                         {isSelected && <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -294,7 +294,7 @@ export default function QuickLesson({ user }) {
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-30">
+      <nav className="bg-white border-b border-border sticky top-0 z-30">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <button onClick={() => navigate('/dashboard')}>
             <Logo size="sm" />
@@ -325,7 +325,7 @@ export default function QuickLesson({ user }) {
           {currentStep === 1 && analysisRunning && (
             <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
               <div className="bg-white rounded-2xl shadow-2xl p-8 flex flex-col items-center gap-4 max-w-sm mx-4">
-                <div className="w-12 h-12 border-4 border-gray-200 border-t-accent rounded-full animate-spin" />
+                <div className="w-12 h-12 border-4 border-gray-200 border-t-primary rounded-full animate-spin" />
                 <div className="text-center">
                   <p className="font-semibold text-primary">Analyzing your lesson...</p>
                   <p className="text-label text-sm mt-1">Checking California standards coverage</p>

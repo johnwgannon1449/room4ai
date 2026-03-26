@@ -118,14 +118,14 @@ export default function Step2({ data, lessonData, onChange, onNext, onBack }) {
                 onClick={() => toggleStandard(standard)}
                 className={`w-full text-left px-4 py-3 rounded-lg border transition-all duration-200 ${
                   isSelected
-                    ? 'border-accent bg-amber-50 ring-1 ring-accent'
-                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                    ? 'border-primary bg-primary-light ring-1 ring-primary'
+                    : 'border-border bg-white hover:border-primary hover:bg-primary-light'
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <div
                     className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 border-2 flex items-center justify-center transition-all ${
-                      isSelected ? 'bg-accent border-accent' : 'border-gray-300'
+                      isSelected ? 'bg-primary border-primary' : 'border-gray-300'
                     }`}
                   >
                     {isSelected && (

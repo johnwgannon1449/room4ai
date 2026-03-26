@@ -38,7 +38,7 @@ router.post('/', authMiddleware, async (req, res) => {
   const {
     teacher_name, grade, subject, school_name, class_date,
     warmup_activity, warmup_duration, exit_ticket,
-    differentiation_notes, materials, homework_reminder,
+    differentiation_notes, materials, homework_reminder, default_duration,
   } = req.body;
 
   if (!teacher_name || !grade || !subject) {
@@ -49,14 +49,15 @@ router.post('/', authMiddleware, async (req, res) => {
     const result = await pool.query(
       `INSERT INTO classes
         (user_id, teacher_name, grade, subject, school_name, class_date,
-         warmup_activity, warmup_duration, exit_ticket, differentiation_notes, materials, homework_reminder)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
+         warmup_activity, warmup_duration, exit_ticket, differentiation_notes, materials, homework_reminder, default_duration)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
       [
         req.userId, teacher_name, grade, subject,
         school_name || null, class_date || null,
         warmup_activity || null, warmup_duration || null,
         exit_ticket || null, differentiation_notes || null,
         materials || null, homework_reminder || null,
+        default_duration || null,
       ]
     );
 
@@ -73,7 +74,7 @@ router.patch('/:id', authMiddleware, async (req, res) => {
   const {
     teacher_name, grade, subject, school_name, class_date,
     warmup_activity, warmup_duration, exit_ticket,
-    differentiation_notes, materials, homework_reminder,
+    differentiation_notes, materials, homework_reminder, default_duration,
   } = req.body;
 
   try {
@@ -95,8 +96,9 @@ router.patch('/:id', authMiddleware, async (req, res) => {
         exit_ticket = $8,
         differentiation_notes = $9,
         materials = $10,
-        homework_reminder = $11
-       WHERE id = $12 AND user_id = $13
+        homework_reminder = $11,
+        default_duration = $12
+       WHERE id = $13 AND user_id = $14
        RETURNING *`,
       [
         teacher_name, grade, subject,
@@ -104,6 +106,7 @@ router.patch('/:id', authMiddleware, async (req, res) => {
         warmup_activity || null, warmup_duration || null,
         exit_ticket || null, differentiation_notes || null,
         materials || null, homework_reminder || null,
+        default_duration !== undefined ? (default_duration || null) : null,
         req.params.id, req.userId,
       ]
     );

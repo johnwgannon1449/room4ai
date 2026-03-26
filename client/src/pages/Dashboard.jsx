@@ -10,18 +10,18 @@ const TEMPLATE_NAMES = {
 
 function ClassCard({ cls, onEdit, onNewLesson, onViewLessons, expanded, onToggleExpand }) {
   return (
-    <div className="card hover:shadow-md transition-shadow">
+    <div className="card hover:shadow-card-hover transition-shadow">
       <div className="flex items-start gap-4">
         {/* Color indicator */}
-        <div className="w-1 self-stretch rounded-full bg-accent flex-shrink-0" />
+        <div className="w-1 self-stretch rounded-full bg-primary flex-shrink-0" />
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div>
               <h3 className="font-semibold text-primary text-lg leading-snug">{cls.teacher_name}</h3>
               <div className="flex flex-wrap gap-2 mt-1">
-                <span className="text-xs bg-blue-50 text-primary px-2 py-0.5 rounded-full border border-blue-100 font-medium">{cls.grade}</span>
-                <span className="text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-100 font-medium">{cls.subject}</span>
+                <span className="badge-green">{cls.grade}</span>
+                <span className="badge-amber">{cls.subject}</span>
                 {cls.school_name && (
                   <span className="text-xs text-label">{cls.school_name}</span>
                 )}
@@ -42,13 +42,13 @@ function ClassCard({ cls, onEdit, onNewLesson, onViewLessons, expanded, onToggle
             </button>
             <button
               onClick={onToggleExpand}
-              className="text-sm font-medium text-primary hover:text-accent transition-colors px-3 py-1.5 rounded-lg border border-gray-200 hover:border-accent hover:bg-amber-50"
+              className="text-sm font-medium text-primary hover:bg-primary-light transition-colors px-3 py-1.5 rounded-lg border border-border hover:border-primary"
             >
               {expanded ? 'Hide Lessons' : 'View Lessons'}
             </button>
             <button
               onClick={() => onEdit(cls)}
-              className="text-sm font-medium text-label hover:text-primary transition-colors px-3 py-1.5 rounded-lg border border-gray-200 hover:border-gray-300"
+              className="text-sm font-medium text-label hover:text-primary transition-colors px-3 py-1.5 rounded-lg border border-border hover:border-primary"
             >
               Edit Class
             </button>
@@ -76,15 +76,15 @@ function ClassLessons({ classId }) {
 
   if (loading) {
     return (
-      <div className="mt-4 pt-4 border-t border-gray-100 flex justify-center py-4">
-        <div className="w-5 h-5 border-2 border-gray-200 border-t-accent rounded-full animate-spin" />
+      <div className="mt-4 pt-4 border-t border-border flex justify-center py-4">
+        <div className="w-5 h-5 border-2 border-border border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
 
   if (lessons.length === 0) {
     return (
-      <div className="mt-4 pt-4 border-t border-gray-100">
+      <div className="mt-4 pt-4 border-t border-border">
         <p className="text-sm text-label text-center py-3">No lessons yet for this class.</p>
       </div>
     );
@@ -101,7 +101,7 @@ function ClassLessons({ classId }) {
   }
 
   return (
-    <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+    <div className="mt-4 pt-4 border-t border-border space-y-2">
       {inProgress.length > 0 && (
         <>
           <p className="text-xs font-semibold text-label uppercase tracking-wide mb-2">In Progress</p>
@@ -177,7 +177,7 @@ export default function Dashboard({ user, onLogout }) {
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-30">
+      <nav className="bg-white border-b border-border sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Logo size="md" />
           <div className="flex items-center gap-3">
@@ -219,13 +219,13 @@ export default function Dashboard({ user, onLogout }) {
         {/* Loading */}
         {loading && (
           <div className="flex justify-center py-12">
-            <div className="w-8 h-8 border-4 border-gray-200 border-t-accent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />
           </div>
         )}
 
         {/* Empty state */}
         {!loading && classes.length === 0 && (
-          <div className="card bg-gradient-to-br from-primary to-blue-800 text-white border-0">
+          <div className="card bg-gradient-to-br from-[#1A7A55] to-[#1A2E25] text-white border-0">
             <div className="flex items-start gap-4">
               <div className="text-4xl">📚</div>
               <div>
@@ -259,7 +259,7 @@ export default function Dashboard({ user, onLogout }) {
         )}
 
         {/* Template section */}
-        <section className="border-t border-gray-100 pt-6">
+        <section className="border-t border-border pt-6">
           <button
             onClick={() => setShowTemplateSection((s) => !s)}
             className="flex items-center justify-between w-full text-left group"

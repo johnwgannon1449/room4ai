@@ -74,7 +74,7 @@ export default function Step3({ data, onChange, onNext, onBack }) {
       </div>
 
       {/* Voice input area */}
-      <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
+      <div className="bg-background rounded-lg border border-border p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-primary">Voice Input</span>
           {transcribing && (
@@ -91,7 +91,7 @@ export default function Step3({ data, onChange, onNext, onBack }) {
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
               recording
                 ? 'bg-red-500 text-white hover:bg-red-600 animate-pulse'
-                : 'bg-primary text-white hover:bg-blue-900'
+                : 'bg-primary text-white hover:bg-primary-dark'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             <svg className="w-4 h-4" fill={recording ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">

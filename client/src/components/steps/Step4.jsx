@@ -49,7 +49,7 @@ export default function Step4({ data, lessonId, lessonData, onChange, onNext, on
 
       {loading ? (
         <div className="flex flex-col items-center justify-center py-16 gap-4">
-          <div className="w-12 h-12 border-4 border-gray-200 border-t-accent rounded-full animate-spin" />
+          <div className="w-12 h-12 border-4 border-border border-t-primary rounded-full animate-spin" />
           <div className="text-center">
             <p className="font-medium text-primary">Analyzing your lesson...</p>
             <p className="text-label text-sm mt-1">Checking against California standards</p>
@@ -63,7 +63,7 @@ export default function Step4({ data, lessonId, lessonData, onChange, onNext, on
       ) : analysis ? (
         <div className="space-y-5">
           {/* Coverage score */}
-          <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+          <div className="bg-background rounded-xl p-5 border border-border">
             <div className="flex items-center justify-between mb-3">
               <span className="font-semibold text-primary">Overall Coverage</span>
               <span className={`text-2xl font-bold ${

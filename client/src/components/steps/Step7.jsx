@@ -69,7 +69,7 @@ export default function Step7({ lessonData, lesson, user, classInfo, onExported 
       </div>
 
       {/* Lesson preview */}
-      <div className="border border-gray-200 rounded-xl overflow-hidden">
+      <div className="border border-border rounded-xl overflow-hidden">
         <div className="bg-[#1A2E25] text-white px-6 py-4">
           <div className="flex items-center">
             <Logo size="sm" />
