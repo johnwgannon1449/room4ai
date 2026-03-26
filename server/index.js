@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const { initDB } = require('./db');
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(cors({
