@@ -190,7 +190,7 @@ export default function TemplatePicker({ user, onUpdate }) {
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
-      <nav className="bg-white border-b border-gray-100">
+      <nav className="bg-white border-b border-border">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Logo size="md" />
           <button onClick={() => navigate('/dashboard')} className="text-sm text-label hover:text-primary transition-colors">
@@ -215,13 +215,13 @@ export default function TemplatePicker({ user, onUpdate }) {
                 onClick={() => setSelected(template.id)}
                 className={`text-left p-3 rounded-xl border-2 transition-all duration-200 relative ${
                   isSelected
-                    ? 'border-accent shadow-lg shadow-amber-100 bg-amber-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                    ? 'border-primary shadow-lg shadow-green-100 bg-primary-light'
+                    : 'border-border bg-white hover:border-primary hover:shadow-sm'
                 }`}
               >
                 {/* Checkmark badge */}
                 {isSelected && (
-                  <div className="absolute top-2 right-2 w-6 h-6 bg-accent rounded-full flex items-center justify-center z-10 shadow">
+                  <div className="absolute top-2 right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center z-10 shadow">
                     <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
@@ -233,7 +233,7 @@ export default function TemplatePicker({ user, onUpdate }) {
 
                 {/* Label */}
                 <div className="mt-3">
-                  <div className={`font-semibold text-sm ${isSelected ? 'text-accent' : 'text-primary'}`}>
+                  <div className={`font-semibold text-sm text-primary`}>
                     {template.name}
                   </div>
                   <div className="text-xs text-label mt-0.5 leading-snug">{template.description}</div>

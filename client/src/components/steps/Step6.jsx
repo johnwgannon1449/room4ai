@@ -44,13 +44,13 @@ export default function Step6({ data, classInfo, onChange, onNext, onBack }) {
       </div>
 
       {hasDefaults && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 text-xs text-blue-700">
+        <div className="bg-primary-light border border-green-200 rounded-lg px-4 py-2.5 text-xs text-primary">
           Fields pre-filled from your class defaults — edit freely for this lesson only.
         </div>
       )}
 
       {/* Warm-up */}
-      <div className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+      <div className="space-y-3 p-4 bg-background rounded-lg border border-border">
         <h3 className="text-sm font-semibold text-primary">Warm-Up Activity</h3>
         <div>
           <label className="label">Activity description</label>

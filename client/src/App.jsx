@@ -7,6 +7,8 @@ import ClassSetup from './pages/ClassSetup';
 import TemplatePicker from './pages/TemplatePicker';
 import LessonWizard from './pages/LessonWizard';
 import QuickLesson from './pages/QuickLesson';
+import TpeExplorer from './pages/TpeExplorer';
+import TpeAnalysis from './pages/TpeAnalysis';
 import { api } from './utils/api';
 
 export default function App() {
@@ -62,6 +64,14 @@ export default function App() {
         <Route
           path="/quick-lesson"
           element={user ? <QuickLesson user={user} /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/tpe-explorer"
+          element={user ? <TpeExplorer user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="/tpe-analysis"
+          element={user ? <TpeAnalysis user={user} onLogout={handleLogout} /> : <Navigate to="/login" replace />}
         />
 
         {/* Defaults */}

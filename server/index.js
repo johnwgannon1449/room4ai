@@ -35,9 +35,12 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/classes', require('./routes/classes'));
 app.use('/api/lessons', require('./routes/lessons'));
 app.use('/api/standards', require('./routes/standards'));
+app.use('/api/tpe', require('./routes/tpe'));
 
 // AI endpoint extra rate limit
 app.use('/api/lessons/:id/analyze', aiLimiter);
+app.use('/api/tpe/analyze', aiLimiter);
+app.use('/api/tpe/actions', aiLimiter);
 
 // Health check
 app.get('/api/health', (req, res) => {

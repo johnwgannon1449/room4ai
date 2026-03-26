@@ -45,9 +45,28 @@ export const api = {
   deleteLesson: (id) => request('DELETE', `/lessons/${id}`),
   analyzeLesson: (id, body) => request('POST', `/lessons/${id}/analyze`, body),
   suggestMiniLessons: (body) => request('POST', '/lessons/suggest-mini', body),
+  suggestCoverage: (body) => request('POST', '/lessons/suggest-coverage', body),
 
   // Standards
   getStandards: (grade, subject) => request('GET', `/standards?grade=${encodeURIComponent(grade)}&subject=${encodeURIComponent(subject)}`),
+
+  // TPE
+  getTpeStandards: () => request('GET', '/tpe/standards'),
+  getTpeActions: (body) => request('POST', '/tpe/actions', body),
+  analyzeTpe: (body) => request('POST', '/tpe/analyze', body),
+  parseDocument: async (file) => {
+    const formData = new FormData();
+    formData.append('document', file);
+    const token = localStorage.getItem('room4ai_token');
+    const res = await fetch(`${BASE_URL}/tpe/parse-document`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Parse failed');
+    return data;
+  },
 
   // Voice
   transcribeAudio: async (audioBlob) => {

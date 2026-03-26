@@ -178,14 +178,14 @@ export default function LessonWizard({ user }) {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-gray-200 border-t-accent rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-border border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-30">
+      <nav className="bg-white border-b border-border sticky top-0 z-30">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <button onClick={() => navigate('/dashboard')}>
             <Logo size="sm" />

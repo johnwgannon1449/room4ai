@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../utils/api';
 
-function MiniLessonSuggestions({ standard, grade, subject, onAddToLesson }) {
+const TYPE_COLORS = {
+  Adaptation: { bg: 'bg-blue-50', border: 'border-blue-200', badge: 'bg-blue-100 text-blue-700', dot: 'bg-blue-400' },
+  'Add-on': { bg: 'bg-amber-50', border: 'border-amber-200', badge: 'bg-amber-100 text-amber-700', dot: 'bg-amber-400' },
+  'New Section': { bg: 'bg-primary-light', border: 'border-green-200', badge: 'bg-green-100 text-primary', dot: 'bg-primary' },
+};
+
+function MiniLessonSuggestions({ standard, lessonContent, grade, subject, onAddToLesson }) {
   const [loading, setLoading] = useState(false);
   const [suggestions, setSuggestions] = useState(null);
   const [error, setError] = useState('');
@@ -11,7 +17,12 @@ function MiniLessonSuggestions({ standard, grade, subject, onAddToLesson }) {
     setLoading(true);
     setError('');
     try {
-      const res = await api.suggestMiniLessons({ standard, grade, subject });
+      const res = await api.suggestCoverage({
+        missedStandards: [standard],
+        lessonContent: lessonContent || '',
+        grade,
+        subject,
+      });
       setSuggestions(res.suggestions || []);
     } catch (err) {
       setError('Could not load suggestions. Try again.');
@@ -21,29 +32,30 @@ function MiniLessonSuggestions({ standard, grade, subject, onAddToLesson }) {
   }
 
   function handleAdd(suggestion, idx) {
-    const text = `\n\n**${suggestion.title}** (${suggestion.duration})\n${suggestion.description}`;
+    const mins = suggestion.estimated_minutes ? ` (${suggestion.estimated_minutes} min)` : '';
+    const text = `\n\n**[${suggestion.type}] ${suggestion.title}**${mins}\n${suggestion.description}`;
     onAddToLesson(text);
     setAdded((a) => ({ ...a, [idx]: true }));
   }
 
   return (
-    <div className="mt-2 border border-amber-200 bg-amber-50 rounded-lg p-3">
+    <div className="mt-2 border border-border bg-background rounded-lg p-3">
       {!suggestions && !loading && (
         <button
           onClick={fetchSuggestions}
-          className="text-sm font-medium text-accent hover:text-amber-600 transition-colors flex items-center gap-1"
+          className="text-sm font-medium text-primary hover:text-primary-dark transition-colors flex items-center gap-1.5"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.344.346a3.03 3.03 0 00-.67 2.01V17a1 1 0 01-1 1h-2a1 1 0 01-1-1v-.38a3.037 3.037 0 00-.67-2.012l-.344-.345z" />
           </svg>
-          Get AI lesson ideas for this standard
+          Get AI coverage suggestions
         </button>
       )}
 
       {loading && (
         <div className="flex items-center gap-2 text-sm text-label">
-          <div className="w-3 h-3 border-2 border-amber-300 border-t-accent rounded-full animate-spin" />
-          Generating ideas...
+          <div className="w-3 h-3 border-2 border-green-200 border-t-primary rounded-full animate-spin" />
+          Generating suggestions...
         </div>
       )}
 
@@ -56,36 +68,42 @@ function MiniLessonSuggestions({ standard, grade, subject, onAddToLesson }) {
 
       {suggestions && (
         <div className="space-y-2">
-          <p className="text-xs font-medium text-amber-800 mb-2">Mini lesson ideas:</p>
-          {suggestions.map((s, idx) => (
-            <div key={idx} className="bg-white border border-amber-100 rounded-lg p-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-primary">{s.title}</span>
-                    <span className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">{s.duration}</span>
+          <p className="text-xs font-semibold text-label uppercase tracking-wide mb-2">Coverage suggestions</p>
+          {suggestions.map((s, idx) => {
+            const colors = TYPE_COLORS[s.type] || TYPE_COLORS['Add-on'];
+            return (
+              <div key={idx} className={`border rounded-lg p-3 ${colors.bg} ${colors.border}`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${colors.badge}`}>{s.type}</span>
+                      <span className="text-sm font-semibold text-text-main">{s.title}</span>
+                      {s.estimated_minutes && (
+                        <span className="text-xs text-label">{s.estimated_minutes} min</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-text-main mt-1.5 leading-relaxed">{s.description}</p>
                   </div>
-                  <p className="text-xs text-text-main mt-1 leading-relaxed">{s.description}</p>
+                  <button
+                    onClick={() => handleAdd(s, idx)}
+                    disabled={added[idx]}
+                    className={`text-xs px-2 py-1.5 rounded flex-shrink-0 font-medium transition-all ${
+                      added[idx]
+                        ? 'bg-green-100 text-primary cursor-default'
+                        : 'bg-primary text-white hover:bg-primary-dark'
+                    }`}
+                  >
+                    {added[idx] ? '✓ Added' : 'Add'}
+                  </button>
                 </div>
-                <button
-                  onClick={() => handleAdd(s, idx)}
-                  disabled={added[idx]}
-                  className={`text-xs px-2 py-1.5 rounded flex-shrink-0 font-medium transition-all ${
-                    added[idx]
-                      ? 'bg-green-100 text-green-700 cursor-default'
-                      : 'bg-accent text-white hover:bg-amber-500'
-                  }`}
-                >
-                  {added[idx] ? '✓ Added' : 'Add to Lesson'}
-                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
           <button
             onClick={fetchSuggestions}
             className="text-xs text-label hover:text-primary transition-colors"
           >
-            Regenerate ideas
+            Regenerate suggestions
           </button>
         </div>
       )}
@@ -248,6 +266,7 @@ export default function Step5({ data, lessonData, onChange, onNext, onBack }) {
                 <div className="px-3 pb-3">
                   <MiniLessonSuggestions
                     standard={standard}
+                    lessonContent={editedContent}
                     grade={grade}
                     subject={subject}
                     onAddToLesson={handleAddToLesson}
@@ -260,7 +279,7 @@ export default function Step5({ data, lessonData, onChange, onNext, onBack }) {
       </div>
 
       {/* Divider */}
-      <div className="border-t border-gray-100 pt-4">
+      <div className="border-t border-border pt-4">
         <label className="label text-base mb-2">Lesson Content</label>
         <textarea
           className="input-field min-h-[280px] resize-y leading-relaxed"

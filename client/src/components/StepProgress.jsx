@@ -19,9 +19,9 @@ export default function StepProgress({ currentStep, onStepClick, steps = DEFAULT
                   title={isCompleted ? `Go back to ${label}` : label}
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
                     isCompleted
-                      ? 'bg-progress-green text-white hover:bg-green-600 cursor-pointer ring-2 ring-transparent hover:ring-green-300'
+                      ? 'bg-primary text-white hover:bg-primary-dark cursor-pointer ring-2 ring-transparent hover:ring-green-200'
                       : isCurrent
-                      ? 'bg-accent text-white ring-4 ring-amber-100 cursor-default'
+                      ? 'bg-primary text-white ring-4 ring-primary-light cursor-default'
                       : 'bg-gray-100 text-gray-400 cursor-default'
                   }`}
                 >
@@ -34,14 +34,14 @@ export default function StepProgress({ currentStep, onStepClick, steps = DEFAULT
                   )}
                 </button>
                 <span className={`text-xs mt-1 font-medium hidden sm:block ${
-                  isCurrent ? 'text-accent' : isCompleted ? 'text-progress-green' : 'text-gray-400'
+                  isCurrent ? 'text-primary' : isCompleted ? 'text-primary' : 'text-gray-400'
                 }`}>
                   {label}
                 </span>
               </div>
               {idx < steps.length - 1 && (
                 <div className={`flex-1 h-0.5 mx-1 sm:mx-2 transition-all duration-300 ${
-                  isCompleted ? 'bg-progress-green' : 'bg-gray-200'
+                  isCompleted ? 'bg-primary' : 'bg-border'
                 }`} />
               )}
             </div>

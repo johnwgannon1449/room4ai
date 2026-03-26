@@ -46,6 +46,7 @@ async function initDB() {
       'differentiation_notes TEXT',
       'materials TEXT',
       'homework_reminder TEXT',
+      'default_duration INTEGER',
     ];
     for (const col of classColumns) {
       const colName = col.split(' ')[0];
@@ -70,6 +71,20 @@ async function initDB() {
 
     // Add class_id to existing lessons table
     await client.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS class_id INTEGER REFERENCES classes(id) ON DELETE SET NULL;`).catch(() => {});
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS tpe_analyses (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        lesson_title VARCHAR(500),
+        grade VARCHAR(100),
+        subject VARCHAR(255),
+        selected_tpes INTEGER[],
+        lesson_text TEXT,
+        analysis_result JSONB,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
 
     console.log('Database tables initialized successfully');
   } finally {

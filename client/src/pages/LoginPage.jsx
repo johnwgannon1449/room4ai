@@ -52,7 +52,7 @@ export default function LoginPage({ onLogin }) {
         {/* Card */}
         <div className="card">
           {/* Toggle */}
-          <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
+          <div className="flex bg-background rounded-lg p-1 mb-6 border border-border">
             <button
               onClick={() => { setMode('login'); setError(''); }}
               className={`flex-1 py-2 rounded-md text-sm font-semibold transition-all duration-200 ${

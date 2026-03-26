@@ -83,6 +83,64 @@ Return ONLY valid JSON in this exact format:
   }
 });
 
+// AI coverage suggestions for missed standards — must be before /:id routes
+router.post('/suggest-coverage', authMiddleware, async (req, res) => {
+  const { missedStandards, lessonContent, grade, subject } = req.body;
+  if (!missedStandards || !missedStandards.length) {
+    return res.status(400).json({ error: 'missedStandards array is required' });
+  }
+
+  try {
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const standardsList = missedStandards.map((s) => `${s.code}: ${s.description}`).join('\n');
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1200,
+      system: 'You are an expert California K-12 curriculum coach helping teachers improve their lesson plans to better cover state standards.',
+      messages: [{
+        role: 'user',
+        content: `A teacher has a lesson plan that doesn't fully cover some California state standards. Suggest ways to address these gaps.
+
+GRADE: ${grade || 'K-12'}
+SUBJECT: ${subject || 'General'}
+
+MISSED STANDARDS:
+${standardsList}
+
+CURRENT LESSON CONTENT (excerpt):
+${(lessonContent || '').slice(0, 1500)}
+
+Generate exactly 3 suggestions. Each must be one of these types:
+- "Adaptation": Modify an existing part of the lesson to cover the standard
+- "Add-on": A short addition (5-10 min) that can be appended to the lesson
+- "New Section": A full new section (10-20 min) for deeper coverage
+
+Return ONLY valid JSON:
+{
+  "suggestions": [
+    {
+      "type": "Adaptation",
+      "title": "Short descriptive title",
+      "description": "Clear, actionable description of what to do or add.",
+      "estimated_minutes": 10
+    }
+  ]
+}`,
+      }],
+    });
+
+    const text = message.content[0].text;
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Invalid AI response');
+    const parsed = JSON.parse(jsonMatch[0]);
+    res.json(parsed);
+  } catch (err) {
+    console.error('Suggest coverage error:', err);
+    res.status(500).json({ error: 'Suggestion failed: ' + err.message });
+  }
+});
+
 // Get all lessons for user (optionally filtered by class_id)
 router.get('/', authMiddleware, async (req, res) => {
   try {

@@ -5,8 +5,8 @@
 @layer base {
   html {
     font-family: 'Inter', sans-serif;
-    background-color: #F8FAFC;
-    color: #1E293B;
+    background-color: #F0F7F4;
+    color: #1A2E25;
   }
 
   body {
@@ -23,27 +23,35 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-accent text-white font-semibold px-6 py-3 rounded-lg hover:bg-amber-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2;
+    @apply bg-primary text-white font-semibold px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
   }
 
   .btn-secondary {
-    @apply bg-primary text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    @apply bg-white text-primary font-semibold px-6 py-3 rounded-lg border border-primary hover:bg-primary-light transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
   }
 
   .btn-ghost {
-    @apply bg-transparent text-primary font-semibold px-6 py-3 rounded-lg border border-primary hover:bg-primary hover:text-white transition-colors duration-200;
+    @apply bg-transparent text-primary font-semibold px-6 py-3 rounded-lg border border-border hover:border-primary hover:bg-primary-light transition-colors duration-200;
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+    @apply bg-white rounded-xl shadow-card border border-border p-6;
   }
 
   .input-field {
-    @apply w-full border border-gray-200 rounded-lg px-4 py-3 text-text-main placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all duration-200 bg-white;
+    @apply w-full border border-border rounded-lg px-4 py-3 text-text-main placeholder-label focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-white;
   }
 
   .label {
     @apply block text-sm font-medium text-label mb-1.5;
+  }
+
+  .badge-green {
+    @apply text-xs bg-primary-light text-primary px-2 py-0.5 rounded-full border border-green-200 font-medium;
+  }
+
+  .badge-amber {
+    @apply text-xs bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-100 font-medium;
   }
 
   .watermark {
@@ -56,14 +64,14 @@
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F1F5F9;
+  background: #E8F5EF;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #B2D4C4;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #8BBD9E;
 }
 
 /* Progress bar animation */
