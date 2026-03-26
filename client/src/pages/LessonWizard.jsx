@@ -26,6 +26,7 @@ export default function LessonWizard({ user }) {
   const [stepData, setStepData] = useState({});
   const [classInfo, setClassInfo] = useState(null);
   const [saveStatus, setSaveStatus] = useState(null);
+  const [step1Error, setStep1Error] = useState(null);
   const [loading, setLoading] = useState(!isNew);
   const saveTimerRef = useRef(null);
   const retryRef = useRef(false);
@@ -96,6 +97,7 @@ export default function LessonWizard({ user }) {
   async function handleStep1Next(data) {
     const newStepData = { ...stepData, step1: data };
     setStepData(newStepData);
+    setStep1Error(null);
 
     if (!lessonId) {
       setSaveStatus('saving');
@@ -115,7 +117,8 @@ export default function LessonWizard({ user }) {
         setSaveStatus('saved');
         setTimeout(() => setSaveStatus(null), 2500);
       } catch (err) {
-        setSaveStatus('error');
+        setSaveStatus(null);
+        setStep1Error('Unable to save — please check your connection and try again.');
         return;
       }
     } else {
@@ -213,6 +216,7 @@ export default function LessonWizard({ user }) {
               classInfo={classInfo}
               onChange={(data) => updateStepData(1, data)}
               onNext={handleStep1Next}
+              formError={step1Error}
             />
           )}
 

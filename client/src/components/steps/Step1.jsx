@@ -10,7 +10,7 @@ const SUBJECTS = [
   'Art', 'Music', 'Physical Education', 'Computer Science', 'Foreign Language', 'Other',
 ];
 
-export default function Step1({ data, classInfo, onChange, onNext }) {
+export default function Step1({ data, classInfo, onChange, onNext, formError }) {
   // If launched from a class tile, grade/subject/teacher are already known
   const hasClassContext = !!(classInfo?.grade && classInfo?.subject);
   const hasDefaultDuration = classInfo?.default_duration != null;
@@ -45,11 +45,11 @@ export default function Step1({ data, classInfo, onChange, onNext }) {
   function validate() {
     const e = {};
     if (!form.title.trim()) e.title = 'Lesson title is required';
-    // When class context is present, grade/subject come from classInfo (selects are hidden)
-    const effectiveGrade = form.grade || classInfo?.grade || '';
-    const effectiveSubject = form.subject || classInfo?.subject || '';
-    if (!effectiveGrade) e.grade = 'Grade level is required';
-    if (!effectiveSubject) e.subject = 'Subject is required';
+    // Only validate grade/subject when the selects are visible (no class context)
+    if (!hasClassContext) {
+      if (!form.grade) e.grade = 'Grade level is required';
+      if (!form.subject) e.subject = 'Subject is required';
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -188,6 +188,12 @@ export default function Step1({ data, classInfo, onChange, onNext }) {
           </div>
         )}
       </div>
+
+      {formError && (
+        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          {formError}
+        </div>
+      )}
 
       <div className="flex justify-end pt-2">
         <button type="submit" className="btn-primary">
