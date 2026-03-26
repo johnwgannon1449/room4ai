@@ -93,11 +93,13 @@ export default function LessonWizard({ user }) {
   }
 
   // Step 1 — creates or updates lesson, advances to step 2
-  // Fix: use window.history.replaceState to avoid component re-mount after lesson creation
   async function handleStep1Next(data) {
     const newStepData = { ...stepData, step1: data };
     setStepData(newStepData);
     setStep1Error(null);
+
+    // Advance immediately — don't block on API
+    setCurrentStep(2);
 
     if (!lessonId) {
       setSaveStatus('saving');
@@ -112,30 +114,24 @@ export default function LessonWizard({ user }) {
         });
         const newId = res.lesson.id;
         setLessonId(newId);
-        // Update URL without triggering a re-mount
         window.history.replaceState({}, '', `/lesson/${newId}`);
         setSaveStatus('saved');
         setTimeout(() => setSaveStatus(null), 2500);
       } catch (err) {
-        setSaveStatus(null);
-        setStep1Error('Unable to save — please check your connection and try again.');
-        return;
+        setSaveStatus('error');
       }
     } else {
-      try {
-        await api.updateLesson(lessonId, {
-          title: data.title,
-          grade: data.grade,
-          subject: data.subject,
-          step_data: newStepData,
-          current_step: 2,
-        });
-      } catch (err) {
+      api.updateLesson(lessonId, {
+        title: data.title,
+        grade: data.grade,
+        subject: data.subject,
+        step_data: newStepData,
+        current_step: 2,
+      }).catch((err) => {
         console.error('Save error:', err);
-      }
+        setSaveStatus('error');
+      });
     }
-
-    setCurrentStep(2);
   }
 
   async function handleStepNext(step, data) {

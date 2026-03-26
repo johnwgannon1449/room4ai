@@ -66,7 +66,7 @@ export default function Step1({ data, classInfo, onChange, onNext, formError }) 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
       <div>
         <h2 className="text-2xl font-semibold text-primary mb-1">Lesson Basics</h2>
         <p className="text-label text-sm">
