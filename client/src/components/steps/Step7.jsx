@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { exportLessonToPDF } from '../../utils/pdfExport';
+import Logo from '../Logo';
 
 const TEMPLATE_LABELS = {
   classic: 'Classic', modern: 'Modern', structured: 'Structured',
@@ -69,11 +70,11 @@ export default function Step7({ lessonData, lesson, user, classInfo, onExported 
 
       {/* Lesson preview */}
       <div className="border border-gray-200 rounded-xl overflow-hidden">
-        <div className="bg-primary text-white px-6 py-4">
-          <div className="flex items-center gap-1 font-bold text-lg">
-            Room<span className="text-accent">4</span>AI
+        <div className="bg-[#1A2E25] text-white px-6 py-4">
+          <div className="flex items-center">
+            <Logo size="sm" />
           </div>
-          <p className="text-xs text-white/70">Lesson planning, elevated.</p>
+          <p className="text-xs text-white/60 mt-1">Lesson planning, elevated.</p>
           <p className="text-xs text-white/60 mt-1">{classInfo?.teacher_name || user?.name} · {grade} · {subject}</p>
         </div>
 

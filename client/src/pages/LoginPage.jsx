@@ -142,7 +142,7 @@ export default function LoginPage({ onLogin }) {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          For California K-12 educators · Room<span className="text-accent">4</span>AI
+          For California K-12 educators
         </p>
       </div>
     </div>

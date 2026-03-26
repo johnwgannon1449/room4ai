@@ -69,41 +69,57 @@ export function exportLessonToPDF(lesson, user, classInfo) {
   const margin = 20;
   const contentW = pageW - margin * 2;
 
-  // Header
-  doc.setFillColor(...template.headerBg);
-  doc.rect(0, 0, pageW, 40, 'F');
+  // Header — always green/amber brand bar regardless of template
+  // Green badge area (left 52mm)
+  doc.setFillColor(26, 122, 85);       // #1A7A55 brand green
+  doc.rect(0, 0, 52, 44, 'F');
+  // Darker green main band
+  doc.setFillColor(26, 46, 37);        // #1A2E25
+  doc.rect(52, 0, pageW - 52, 44, 'F');
 
+  // "R" in white inside green badge
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.setTextColor(...template.headerText);
-  doc.text('Room', margin, 18);
-  const roomW = doc.getTextWidth('Room');
+  doc.setFontSize(24);
+  doc.setTextColor(255, 255, 255);
+  doc.text('R', 6, 30);
+  // "4" in amber inside green badge
   doc.setTextColor(245, 158, 11);
-  doc.text('4', margin + roomW, 18);
-  doc.setTextColor(...template.headerText);
-  const fourW = doc.getTextWidth('4');
-  doc.text('AI', margin + roomW + fourW, 18);
+  doc.text('4', 26, 30);
 
+  // "Room4AI" wordmark
+  doc.setFontSize(18);
+  doc.setTextColor(255, 255, 255);
+  doc.text('Room4', 58, 22);
+  const room4W = doc.getTextWidth('Room4');
+  doc.setTextColor(245, 158, 11);
+  doc.text('AI', 58 + room4W, 22);
+
+  // Tagline
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(...template.headerText);
-  doc.text('Lesson planning, elevated.', margin, 26);
+  doc.setFontSize(8);
+  doc.setTextColor(255, 255, 255);
+  doc.setGState(new doc.GState({ opacity: 0.6 }));
+  doc.text('Lesson planning, elevated.', 58, 32);
+  doc.setGState(new doc.GState({ opacity: 1 }));
 
-  doc.setFontSize(9);
+  // Teacher / grade / subject / date — right aligned
+  doc.setFontSize(8);
+  doc.setTextColor(255, 255, 255);
+  doc.setGState(new doc.GState({ opacity: 0.75 }));
   const teacherName = classInfo?.teacher_name || user?.name || 'Teacher';
   const grade = lesson?.grade || classInfo?.grade || '';
   const subject = lesson?.subject || classInfo?.subject || '';
   const dateStr = classInfo?.class_date
     ? new Date(classInfo.class_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     : new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  doc.text(`${teacherName}  |  ${grade}  |  ${subject}  |  ${dateStr}`, pageW - margin, 26, { align: 'right' });
+  doc.text(`${teacherName}  ·  ${grade}  ·  ${subject}  ·  ${dateStr}`, pageW - margin, 32, { align: 'right' });
+  doc.setGState(new doc.GState({ opacity: 1 }));
 
-  if (template.accentLine) {
-    doc.setFillColor(245, 158, 11);
-    doc.rect(0, 40, pageW, 2, 'F');
-  }
+  // Amber accent line below header
+  doc.setFillColor(245, 158, 11);
+  doc.rect(0, 44, pageW, 2, 'F');
 
-  let y = 52;
+  let y = 56;
 
   const stepData = lesson?.step_data || {};
 
