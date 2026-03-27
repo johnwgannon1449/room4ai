@@ -13,12 +13,15 @@ export default function Step4({ data, lessonId, lessonData, onChange, onNext, on
   }, []);
 
   async function runAnalysis() {
-    const standards = lessonData?.step2?.selectedStandards || [];
+    const selectedTpes = lessonData?.step2?.selectedTpes || [];
     const content = lessonData?.step3?.content || '';
+    const title = lessonData?.step1?.title || '';
+    const grade = lessonData?.step1?.grade || '';
+    const subject = lessonData?.step1?.subject || '';
     const objectives = lessonData?.step1?.objectives || '';
 
-    if (!content || !standards.length) {
-      setError('Missing lesson content or standards. Please go back and complete previous steps.');
+    if (!content || !selectedTpes.length) {
+      setError('Missing lesson content or TPE selection. Please go back and complete the previous steps.');
       return;
     }
 
@@ -26,13 +29,46 @@ export default function Step4({ data, lessonId, lessonData, onChange, onNext, on
     setError('');
 
     try {
-      const res = await api.analyzeLesson(lessonId, {
-        lessonContent: content,
-        standards,
-        objectives,
+      const res = await api.analyzeTpe({
+        lesson_text: objectives ? `Objectives: ${objectives}\n\n${content}` : content,
+        lesson_title: title,
+        grade,
+        subject,
+        selected_tpes: selectedTpes,
       });
-      setAnalysis(res.analysis);
-      onChange({ analysis: res.analysis });
+
+      const { summary, tpe_results = [] } = res;
+
+      // Build scannable strengths/gaps from element-level results
+      const strengths = [];
+      const gaps = [];
+      let firstSuggestion = null;
+
+      for (const tpe of tpe_results) {
+        for (const el of tpe.elements) {
+          if (el.coverage === 'strong' && el.strength && strengths.length < 5) {
+            strengths.push(`✓ TPE ${el.element_id}: ${el.strength}`);
+          }
+          if (el.coverage === 'not_evident' && el.suggestion && gaps.length < 3) {
+            gaps.push(`✗ TPE ${el.element_id}: ${el.suggestion}`);
+          }
+          if (!firstSuggestion && el.coverage !== 'strong' && el.suggestion) {
+            firstSuggestion = el.suggestion;
+          }
+        }
+      }
+
+      const analysis = {
+        coveragePercent: summary.percentage,
+        strengths,
+        gaps,
+        recommendation: firstSuggestion ? `→ ${firstSuggestion}` : null,
+        tpeResults: tpe_results,
+        summary,
+      };
+
+      setAnalysis(analysis);
+      onChange({ analysis });
     } catch (err) {
       setError('Analysis failed: ' + err.message);
     } finally {
@@ -44,7 +80,7 @@ export default function Step4({ data, lessonId, lessonData, onChange, onNext, on
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-semibold text-primary mb-1">Coverage Report</h2>
-        <p className="text-label text-sm">AI analysis of your lesson against selected standards</p>
+        <p className="text-label text-sm">AI analysis of your lesson against selected TPE standards</p>
       </div>
 
       {loading ? (
@@ -52,7 +88,7 @@ export default function Step4({ data, lessonId, lessonData, onChange, onNext, on
           <div className="w-12 h-12 border-4 border-border border-t-primary rounded-full animate-spin" />
           <div className="text-center">
             <p className="font-medium text-primary">Analyzing your lesson...</p>
-            <p className="text-label text-sm mt-1">Checking against California standards</p>
+            <p className="text-label text-sm mt-1">Checking against selected TPE standards</p>
           </div>
         </div>
       ) : error ? (
@@ -65,7 +101,7 @@ export default function Step4({ data, lessonId, lessonData, onChange, onNext, on
           {/* Coverage score */}
           <div className="bg-background rounded-xl p-5 border border-border">
             <div className="flex items-center justify-between mb-3">
-              <span className="font-semibold text-primary">Overall Coverage</span>
+              <span className="font-semibold text-primary">TPE Coverage</span>
               <span className={`text-2xl font-bold ${
                 analysis.coveragePercent >= 75 ? 'text-progress-green' :
                 analysis.coveragePercent >= 50 ? 'text-amber-500' : 'text-red-500'
@@ -82,6 +118,11 @@ export default function Step4({ data, lessonId, lessonData, onChange, onNext, on
                 }}
               />
             </div>
+            {analysis.summary && (
+              <p className="text-xs text-label mt-2">
+                {analysis.summary.addressed} of {analysis.summary.total_elements} elements addressed
+              </p>
+            )}
           </div>
 
           {/* Strengths */}

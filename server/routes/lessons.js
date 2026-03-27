@@ -177,12 +177,12 @@ router.get('/:id', authMiddleware, async (req, res) => {
 
 // Create lesson
 router.post('/', authMiddleware, async (req, res) => {
-  const { title, grade, subject, step_data, current_step, class_id } = req.body;
+  const { title, grade, subject, step_data, current_step, class_id, selected_tpes } = req.body;
 
   try {
     const result = await pool.query(
-      `INSERT INTO lessons (user_id, class_id, title, grade, subject, step_data, current_step)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      `INSERT INTO lessons (user_id, class_id, title, grade, subject, step_data, current_step, selected_tpes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
       [
         req.userId,
         class_id || null,
@@ -191,6 +191,7 @@ router.post('/', authMiddleware, async (req, res) => {
         subject || '',
         JSON.stringify(step_data || {}),
         current_step || 1,
+        selected_tpes || null,
       ]
     );
     res.status(201).json({ lesson: result.rows[0] });
@@ -202,7 +203,7 @@ router.post('/', authMiddleware, async (req, res) => {
 
 // Update lesson (auto-save)
 router.patch('/:id', authMiddleware, async (req, res) => {
-  const { title, grade, subject, step_data, current_step, status, class_id } = req.body;
+  const { title, grade, subject, step_data, current_step, status, class_id, selected_tpes } = req.body;
 
   try {
     const existing = await pool.query(
@@ -222,6 +223,7 @@ router.patch('/:id', authMiddleware, async (req, res) => {
     if (current_step !== undefined) { updates.push(`current_step = $${i++}`); values.push(current_step); }
     if (status !== undefined) { updates.push(`status = $${i++}`); values.push(status); }
     if (class_id !== undefined) { updates.push(`class_id = $${i++}`); values.push(class_id); }
+    if (selected_tpes !== undefined) { updates.push(`selected_tpes = $${i++}`); values.push(selected_tpes); }
     updates.push(`updated_at = NOW()`);
 
     if (values.length === 0) return res.json({ success: true });

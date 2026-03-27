@@ -1,121 +1,89 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../utils/api';
 
+const TPE_DESCRIPTIONS = {
+  1: 'Know your students — leverage backgrounds, interests, and social-emotional needs to engage all learners',
+  2: 'Build a safe, organized, inclusive classroom environment that supports all learners',
+  3: 'Know your content deeply — organize and connect subject matter for student understanding',
+  4: 'Plan purposeful, differentiated instruction aligned to standards and student needs',
+  5: 'Assess student learning continuously and use data to adjust and improve instruction',
+  6: 'Grow professionally — collaborate with colleagues, families, and the school community',
+  7: 'Deliver evidence-based literacy instruction grounded in foundational skills and meaning-making',
+};
+
 export default function Step2({ data, lessonData, onChange, onNext, onBack }) {
   const [standards, setStandards] = useState([]);
-  const [selected, setSelected] = useState(data?.selectedStandards || []);
-  const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState(data?.selectedTpes || []);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const grade = lessonData?.step1?.grade || '';
-  const subject = lessonData?.step1?.subject || '';
-
   useEffect(() => {
-    if (grade && subject) {
-      loadStandards();
-    }
-  }, [grade, subject]);
+    api.getTpeStandards()
+      .then((res) => setStandards(res.standards || []))
+      .catch(() => setError('Could not load TPE standards. Please try refreshing.'))
+      .finally(() => setLoading(false));
+  }, []);
 
-  async function loadStandards() {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await api.getStandards(grade, subject);
-      setStandards(res.standards || []);
-    } catch (err) {
-      setError('Could not load standards. Using defaults.');
-      setStandards([]);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function toggleStandard(standard) {
-    const isSelected = selected.some((s) => s.code === standard.code);
-    const updated = isSelected
-      ? selected.filter((s) => s.code !== standard.code)
-      : [...selected, standard];
+  function toggleTpe(id) {
+    const updated = selected.includes(id)
+      ? selected.filter((s) => s !== id)
+      : [...selected, id];
     setSelected(updated);
-    onChange({ selectedStandards: updated });
+    notifyChange(updated);
   }
 
-  function selectAll() {
-    const filtered = filteredStandards;
-    const allSelected = filtered.every((s) => selected.some((sel) => sel.code === s.code));
-    if (allSelected) {
-      const updated = selected.filter((s) => !filtered.some((f) => f.code === s.code));
-      setSelected(updated);
-      onChange({ selectedStandards: updated });
-    } else {
-      const toAdd = filtered.filter((s) => !selected.some((sel) => sel.code === s.code));
-      const updated = [...selected, ...toAdd];
-      setSelected(updated);
-      onChange({ selectedStandards: updated });
-    }
+  function toggleAll() {
+    const updated = selected.length === standards.length
+      ? []
+      : standards.map((s) => s.id);
+    setSelected(updated);
+    notifyChange(updated);
   }
 
-  const filteredStandards = standards.filter((s) => {
-    const q = search.toLowerCase();
-    return s.code.toLowerCase().includes(q) || s.description.toLowerCase().includes(q);
-  });
+  function notifyChange(ids) {
+    const tpeData = standards
+      .filter((s) => ids.includes(s.id))
+      .map((s) => ({ id: s.id, title: s.title, elementCount: s.elements.length }));
+    onChange({ selectedTpes: ids, selectedTpeData: tpeData });
+  }
+
+  const allSelected = standards.length > 0 && selected.length === standards.length;
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-primary mb-1">California Standards</h2>
+        <h2 className="text-2xl font-semibold text-primary mb-1">Select TPE Focus</h2>
         <p className="text-label text-sm">
-          Select the standards this lesson addresses — {grade}, {subject}
+          Choose which Teaching Performance Expectations (TPEs) this lesson addresses
         </p>
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <svg className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <input
-          className="input-field pl-10"
-          placeholder="Search standards..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      {/* Selected count + select all */}
       <div className="flex items-center justify-between">
         <span className="text-sm text-label">
-          {selected.length} standard{selected.length !== 1 ? 's' : ''} selected
+          {selected.length} TPE{selected.length !== 1 ? 's' : ''} selected
         </span>
         {standards.length > 0 && (
           <button
-            onClick={selectAll}
+            onClick={toggleAll}
             className="text-sm text-accent hover:text-amber-600 font-medium transition-colors"
           >
-            {filteredStandards.every((s) => selected.some((sel) => sel.code === s.code))
-              ? 'Deselect All'
-              : 'Select All'}
+            {allSelected ? 'Deselect All' : 'Select All'}
           </button>
         )}
       </div>
 
-      {/* Standards list */}
       {loading ? (
-        <div className="text-center py-8 text-label">Loading standards...</div>
+        <div className="text-center py-8 text-label">Loading TPE standards...</div>
       ) : error ? (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">{error}</div>
-      ) : filteredStandards.length === 0 ? (
-        <div className="text-center py-8 text-label text-sm">
-          {search ? 'No standards match your search.' : 'No standards available for this grade/subject combination.'}
-        </div>
       ) : (
-        <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
-          {filteredStandards.map((standard) => {
-            const isSelected = selected.some((s) => s.code === standard.code);
+        <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
+          {standards.map((tpe) => {
+            const isSelected = selected.includes(tpe.id);
             return (
               <button
-                key={standard.code}
-                onClick={() => toggleStandard(standard)}
+                key={tpe.id}
+                onClick={() => toggleTpe(tpe.id)}
                 className={`w-full text-left px-4 py-3 rounded-lg border transition-all duration-200 ${
                   isSelected
                     ? 'border-primary bg-primary-light ring-1 ring-primary'
@@ -123,20 +91,22 @@ export default function Step2({ data, lessonData, onChange, onNext, onBack }) {
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  <div
-                    className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 border-2 flex items-center justify-center transition-all ${
-                      isSelected ? 'bg-primary border-primary' : 'border-gray-300'
-                    }`}
-                  >
+                  <div className={`mt-0.5 w-4 h-4 rounded flex-shrink-0 border-2 flex items-center justify-center transition-all ${
+                    isSelected ? 'bg-primary border-primary' : 'border-gray-300'
+                  }`}>
                     {isSelected && (
                       <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
                   </div>
-                  <div>
-                    <div className="font-medium text-sm text-primary">{standard.code}</div>
-                    <div className="text-sm text-text-main mt-0.5 leading-snug">{standard.description}</div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-sm text-primary">TPE {tpe.id}</span>
+                      <span className="text-sm font-medium text-text-main">{tpe.title}</span>
+                    </div>
+                    <p className="text-xs text-label mt-0.5 leading-snug">{TPE_DESCRIPTIONS[tpe.id]}</p>
+                    <p className="text-xs text-label mt-0.5">{tpe.elements.length} elements</p>
                   </div>
                 </div>
               </button>
@@ -148,7 +118,7 @@ export default function Step2({ data, lessonData, onChange, onNext, onBack }) {
       <div className="flex justify-between pt-2">
         <button onClick={onBack} className="btn-ghost">← Back</button>
         <button
-          onClick={() => onNext({ selectedStandards: selected })}
+          onClick={() => onNext({ selectedTpes: selected, selectedTpeData: standards.filter((s) => selected.includes(s.id)).map((s) => ({ id: s.id, title: s.title, elementCount: s.elements.length })) })}
           className="btn-primary"
           disabled={selected.length === 0}
         >

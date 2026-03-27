@@ -180,20 +180,20 @@ export function exportLessonToPDF(lesson, user, classInfo) {
     addSection('Estimated Duration', `${stepData.step1.duration} minutes`);
   }
 
-  // Standards
-  if (stepData.step2?.selectedStandards?.length > 0) {
+  // TPE Focus
+  if (stepData.step2?.selectedTpeData?.length > 0) {
     if (y > pageH - 30) { doc.addPage(); y = 20; }
     doc.setFont(template.sectionFont, 'bold');
     doc.setFontSize(11);
     doc.setTextColor(...template.accentColor);
-    doc.text('California State Standards', margin, y);
+    doc.text('TPE Focus', margin, y);
     y += 6;
     doc.setFont(template.bodyFont, 'normal');
     doc.setFontSize(9);
     doc.setTextColor(...template.bodyColor);
-    stepData.step2.selectedStandards.forEach((s) => {
+    stepData.step2.selectedTpeData.forEach((tpe) => {
       if (y > pageH - 20) { doc.addPage(); y = 20; }
-      const line = `• ${s.code}: ${s.description}`;
+      const line = `• TPE ${tpe.id}: ${tpe.title}`;
       const wrapped = doc.splitTextToSize(line, contentW);
       wrapped.forEach((l) => { doc.text(l, margin, y); y += 5; });
     });
@@ -211,7 +211,7 @@ export function exportLessonToPDF(lesson, user, classInfo) {
     doc.setFont(template.sectionFont, 'bold');
     doc.setFontSize(11);
     doc.setTextColor(...template.accentColor);
-    doc.text(`Standards Coverage: ${coverage}%`, margin, y);
+    doc.text(`TPE Coverage: ${coverage}%`, margin, y);
     y += 6;
     const barW = contentW;
     const fillW = (coverage / 100) * barW;

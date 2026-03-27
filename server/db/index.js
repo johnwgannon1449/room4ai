@@ -69,8 +69,9 @@ async function initDB() {
       );
     `);
 
-    // Add class_id to existing lessons table
+    // Add class_id and selected_tpes to existing lessons table (idempotent)
     await client.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS class_id INTEGER REFERENCES classes(id) ON DELETE SET NULL;`).catch(() => {});
+    await client.query(`ALTER TABLE lessons ADD COLUMN IF NOT EXISTS selected_tpes INTEGER[];`).catch(() => {});
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS tpe_analyses (

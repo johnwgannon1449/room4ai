@@ -26,7 +26,7 @@ export default function Step7({ lessonData, lesson, user, classInfo, onExported 
   const subject = stepData.step1?.subject || lesson?.subject || '';
   const objectives = stepData.step1?.objectives || '';
   const duration = stepData.step1?.duration || '';
-  const standards = stepData.step2?.selectedStandards || [];
+  const selectedTpeData = stepData.step2?.selectedTpeData || [];
   const content = stepData.step5?.editedContent || stepData.step3?.content || '';
   const coveragePercent = stepData.step5?.coveragePercent ?? stepData.step4?.analysis?.coveragePercent ?? 0;
   const details = stepData.step6 || {};
@@ -104,14 +104,14 @@ export default function Step7({ lessonData, lesson, user, classInfo, onExported 
             </div>
           )}
 
-          {standards.length > 0 && (
+          {selectedTpeData.length > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-accent uppercase tracking-wide mb-1">California Standards</h3>
+              <h3 className="text-xs font-semibold text-accent uppercase tracking-wide mb-1">TPE Focus</h3>
               <ul className="text-sm text-text-main space-y-0.5">
-                {standards.slice(0, 4).map((s) => (
-                  <li key={s.code}><strong>{s.code}</strong>: {s.description}</li>
+                {selectedTpeData.slice(0, 5).map((tpe) => (
+                  <li key={tpe.id}><strong>TPE {tpe.id}</strong>: {tpe.title}</li>
                 ))}
-                {standards.length > 4 && <li className="text-label text-xs">+{standards.length - 4} more...</li>}
+                {selectedTpeData.length > 5 && <li className="text-label text-xs">+{selectedTpeData.length - 5} more...</li>}
               </ul>
             </div>
           )}
@@ -132,7 +132,7 @@ export default function Step7({ lessonData, lesson, user, classInfo, onExported 
 
           {coveragePercent > 0 && (
             <div>
-              <h3 className="text-xs font-semibold text-accent uppercase tracking-wide mb-2">Standards Coverage</h3>
+              <h3 className="text-xs font-semibold text-accent uppercase tracking-wide mb-2">TPE Coverage</h3>
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
